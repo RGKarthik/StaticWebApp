@@ -1,0 +1,17 @@
+{
+  "routes": [
+    {
+      "route": "/",
+      "serve": "/index-standalone.html"
+    }
+  ],
+  "navigationFallback": {
+    "rewrite": "/index-standalone.html"
+  },
+  "mimeTypes": {
+    ".json": "application/json"
+  },
+  "globalHeaders": {
+    "cache-control": "no-cache"
+  }
+}

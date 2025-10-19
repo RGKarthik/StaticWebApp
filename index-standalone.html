@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Countries and Capitals Explorer - Standalone</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .alphabet-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .alphabet-btn {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            border: none;
+            padding: 12px 16px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 50px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .alphabet-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(45deg, #45a049, #4CAF50);
+        }
+
+        .alphabet-btn.active {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a52);
+            transform: translateY(-2px);
+        }
+
+        .clear-btn {
+            background: linear-gradient(45deg, #ffa726, #ff9800);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-left: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .clear-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(45deg, #ff9800, #ffa726);
+        }
+
+        .results-container {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.1);
+            min-height: 200px;
+        }
+
+        .results-header {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .country-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+        }
+
+        .country-item {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .country-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .country-name {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .capital-name {
+            color: #666;
+            font-style: italic;
+        }
+
+        .no-results {
+            text-align: center;
+            color: #666;
+            font-size: 1.2em;
+            margin-top: 50px;
+        }
+
+        .stats {
+            background: rgba(102, 126, 234, 0.1);
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+            color: #333;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+
+            .alphabet-container {
+                gap: 5px;
+            }
+
+            .alphabet-btn {
+                padding: 10px 12px;
+                font-size: 14px;
+                min-width: 40px;
+            }
+
+            .country-list {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌍 Countries and Capitals Explorer</h1>
+        
+        <div class="alphabet-container">
+            <div id="alphabetButtons"></div>
+            <button class="clear-btn" onclick="clearFilter()">Show All</button>
+        </div>
+
+        <div class="results-container">
+            <div class="results-header" id="resultsHeader">
+                Ready! Click any alphabet to explore countries
+            </div>
+            <div class="stats" id="statsContainer" style="display: none;"></div>
+            <div class="country-list" id="countryList">
+                <div style="text-align: center; color: #667eea; margin-top: 20px;">
+                    Click on any alphabet button above to see countries starting with that letter!
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Embedded countries data - no need for external JSON file
+        const countriesData = [
+            {"country": "Afghanistan", "capital": "Kabul"},
+            {"country": "Albania", "capital": "Tirana"},
+            {"country": "Algeria", "capital": "Algiers"},
+            {"country": "Andorra", "capital": "Andorra la Vella"},
+            {"country": "Angola", "capital": "Luanda"},
+            {"country": "Antigua and Barbuda", "capital": "Saint John's"},
+            {"country": "Argentina", "capital": "Buenos Aires"},
+            {"country": "Armenia", "capital": "Yerevan"},
+            {"country": "Australia", "capital": "Canberra"},
+            {"country": "Austria", "capital": "Vienna"},
+            {"country": "Azerbaijan", "capital": "Baku"},
+            {"country": "Bahamas", "capital": "Nassau"},
+            {"country": "Bahrain", "capital": "Manama"},
+            {"country": "Bangladesh", "capital": "Dhaka"},
+            {"country": "Barbados", "capital": "Bridgetown"},
+            {"country": "Belarus", "capital": "Minsk"},
+            {"country": "Belgium", "capital": "Brussels"},
+            {"country": "Belize", "capital": "Belmopan"},
+            {"country": "Benin", "capital": "Porto-Novo"},
+            {"country": "Bhutan", "capital": "Thimphu"},
+            {"country": "Bolivia", "capital": "Sucre"},
+            {"country": "Bosnia and Herzegovina", "capital": "Sarajevo"},
+            {"country": "Botswana", "capital": "Gaborone"},
+            {"country": "Brazil", "capital": "Brasília"},
+            {"country": "Brunei", "capital": "Bandar Seri Begawan"},
+            {"country": "Bulgaria", "capital": "Sofia"},
+            {"country": "Burkina Faso", "capital": "Ouagadougou"},
+            {"country": "Burundi", "capital": "Gitega"},
+            {"country": "Cabo Verde", "capital": "Praia"},
+            {"country": "Cambodia", "capital": "Phnom Penh"},
+            {"country": "Cameroon", "capital": "Yaoundé"},
+            {"country": "Canada", "capital": "Ottawa"},
+            {"country": "Central African Republic", "capital": "Bangui"},
+            {"country": "Chad", "capital": "N'Djamena"},
+            {"country": "Chile", "capital": "Santiago"},
+            {"country": "China", "capital": "Beijing"},
+            {"country": "Colombia", "capital": "Bogotá"},
+            {"country": "Comoros", "capital": "Moroni"},
+            {"country": "Congo, Democratic Republic of the", "capital": "Kinshasa"},
+            {"country": "Congo, Republic of the", "capital": "Brazzaville"},
+            {"country": "Costa Rica", "capital": "San José"},
+            {"country": "Croatia", "capital": "Zagreb"},
+            {"country": "Cuba", "capital": "Havana"},
+            {"country": "Cyprus", "capital": "Nicosia"},
+            {"country": "Czech Republic", "capital": "Prague"},
+            {"country": "Denmark", "capital": "Copenhagen"},
+            {"country": "Djibouti", "capital": "Djibouti"},
+            {"country": "Dominica", "capital": "Roseau"},
+            {"country": "Dominican Republic", "capital": "Santo Domingo"},
+            {"country": "Ecuador", "capital": "Quito"},
+            {"country": "Egypt", "capital": "Cairo"},
+            {"country": "El Salvador", "capital": "San Salvador"},
+            {"country": "Equatorial Guinea", "capital": "Malabo"},
+            {"country": "Eritrea", "capital": "Asmara"},
+            {"country": "Estonia", "capital": "Tallinn"},
+            {"country": "Eswatini", "capital": "Mbabane"},
+            {"country": "Ethiopia", "capital": "Addis Ababa"},
+            {"country": "Fiji", "capital": "Suva"},
+            {"country": "Finland", "capital": "Helsinki"},
+            {"country": "France", "capital": "Paris"},
+            {"country": "Gabon", "capital": "Libreville"},
+            {"country": "Gambia", "capital": "Banjul"},
+            {"country": "Georgia", "capital": "Tbilisi"},
+            {"country": "Germany", "capital": "Berlin"},
+            {"country": "Ghana", "capital": "Accra"},
+            {"country": "Greece", "capital": "Athens"},
+            {"country": "Grenada", "capital": "Saint George's"},
+            {"country": "Guatemala", "capital": "Guatemala City"},
+            {"country": "Guinea", "capital": "Conakry"},
+            {"country": "Guinea-Bissau", "capital": "Bissau"},
+            {"country": "Guyana", "capital": "Georgetown"},
+            {"country": "Haiti", "capital": "Port-au-Prince"},
+            {"country": "Honduras", "capital": "Tegucigalpa"},
+            {"country": "Hungary", "capital": "Budapest"},
+            {"country": "Iceland", "capital": "Reykjavik"},
+            {"country": "India", "capital": "New Delhi"},
+            {"country": "Indonesia", "capital": "Jakarta"},
+            {"country": "Iran", "capital": "Tehran"},
+            {"country": "Iraq", "capital": "Baghdad"},
+            {"country": "Ireland", "capital": "Dublin"},
+            {"country": "Israel", "capital": "Jerusalem"},
+            {"country": "Italy", "capital": "Rome"},
+            {"country": "Ivory Coast", "capital": "Yamoussoukro"},
+            {"country": "Jamaica", "capital": "Kingston"},
+            {"country": "Japan", "capital": "Tokyo"},
+            {"country": "Jordan", "capital": "Amman"},
+            {"country": "Kazakhstan", "capital": "Nur-Sultan"},
+            {"country": "Kenya", "capital": "Nairobi"},
+            {"country": "Kiribati", "capital": "Tarawa"},
+            {"country": "Kuwait", "capital": "Kuwait City"},
+            {"country": "Kyrgyzstan", "capital": "Bishkek"},
+            {"country": "Laos", "capital": "Vientiane"},
+            {"country": "Latvia", "capital": "Riga"},
+            {"country": "Lebanon", "capital": "Beirut"},
+            {"country": "Lesotho", "capital": "Maseru"},
+            {"country": "Liberia", "capital": "Monrovia"},
+            {"country": "Libya", "capital": "Tripoli"},
+            {"country": "Liechtenstein", "capital": "Vaduz"},
+            {"country": "Lithuania", "capital": "Vilnius"},
+            {"country": "Luxembourg", "capital": "Luxembourg"},
+            {"country": "Madagascar", "capital": "Antananarivo"},
+            {"country": "Malawi", "capital": "Lilongwe"},
+            {"country": "Malaysia", "capital": "Kuala Lumpur"},
+            {"country": "Maldives", "capital": "Malé"},
+            {"country": "Mali", "capital": "Bamako"},
+            {"country": "Malta", "capital": "Valletta"},
+            {"country": "Marshall Islands", "capital": "Majuro"},
+            {"country": "Mauritania", "capital": "Nouakchott"},
+            {"country": "Mauritius", "capital": "Port Louis"},
+            {"country": "Mexico", "capital": "Mexico City"},
+            {"country": "Micronesia", "capital": "Palikir"},
+            {"country": "Moldova", "capital": "Chișinău"},
+            {"country": "Monaco", "capital": "Monaco"},
+            {"country": "Mongolia", "capital": "Ulaanbaatar"},
+            {"country": "Montenegro", "capital": "Podgorica"},
+            {"country": "Morocco", "capital": "Rabat"},
+            {"country": "Mozambique", "capital": "Maputo"},
+            {"country": "Myanmar", "capital": "Naypyidaw"},
+            {"country": "Namibia", "capital": "Windhoek"},
+            {"country": "Nauru", "capital": "Yaren"},
+            {"country": "Nepal", "capital": "Kathmandu"},
+            {"country": "Netherlands", "capital": "Amsterdam"},
+            {"country": "New Zealand", "capital": "Wellington"},
+            {"country": "Nicaragua", "capital": "Managua"},
+            {"country": "Niger", "capital": "Niamey"},
+            {"country": "Nigeria", "capital": "Abuja"},
+            {"country": "North Korea", "capital": "Pyongyang"},
+            {"country": "North Macedonia", "capital": "Skopje"},
+            {"country": "Norway", "capital": "Oslo"},
+            {"country": "Oman", "capital": "Muscat"},
+            {"country": "Pakistan", "capital": "Islamabad"},
+            {"country": "Palau", "capital": "Ngerulmud"},
+            {"country": "Palestine", "capital": "East Jerusalem"},
+            {"country": "Panama", "capital": "Panama City"},
+            {"country": "Papua New Guinea", "capital": "Port Moresby"},
+            {"country": "Paraguay", "capital": "Asunción"},
+            {"country": "Peru", "capital": "Lima"},
+            {"country": "Philippines", "capital": "Manila"},
+            {"country": "Poland", "capital": "Warsaw"},
+            {"country": "Portugal", "capital": "Lisbon"},
+            {"country": "Qatar", "capital": "Doha"},
+            {"country": "Romania", "capital": "Bucharest"},
+            {"country": "Russia", "capital": "Moscow"},
+            {"country": "Rwanda", "capital": "Kigali"},
+            {"country": "Saint Kitts and Nevis", "capital": "Basseterre"},
+            {"country": "Saint Lucia", "capital": "Castries"},
+            {"country": "Saint Vincent and the Grenadines", "capital": "Kingstown"},
+            {"country": "Samoa", "capital": "Apia"},
+            {"country": "San Marino", "capital": "San Marino"},
+            {"country": "Sao Tome and Principe", "capital": "São Tomé"},
+            {"country": "Saudi Arabia", "capital": "Riyadh"},
+            {"country": "Senegal", "capital": "Dakar"},
+            {"country": "Serbia", "capital": "Belgrade"},
+            {"country": "Seychelles", "capital": "Victoria"},
+            {"country": "Sierra Leone", "capital": "Freetown"},
+            {"country": "Singapore", "capital": "Singapore"},
+            {"country": "Slovakia", "capital": "Bratislava"},
+            {"country": "Slovenia", "capital": "Ljubljana"},
+            {"country": "Solomon Islands", "capital": "Honiara"},
+            {"country": "Somalia", "capital": "Mogadishu"},
+            {"country": "South Africa", "capital": "Pretoria"},
+            {"country": "South Korea", "capital": "Seoul"},
+            {"country": "South Sudan", "capital": "Juba"},
+            {"country": "Spain", "capital": "Madrid"},
+            {"country": "Sri Lanka", "capital": "Sri Jayawardenepura Kotte"},
+            {"country": "Sudan", "capital": "Khartoum"},
+            {"country": "Suriname", "capital": "Paramaribo"},
+            {"country": "Sweden", "capital": "Stockholm"},
+            {"country": "Switzerland", "capital": "Bern"},
+            {"country": "Syria", "capital": "Damascus"},
+            {"country": "Taiwan", "capital": "Taipei"},
+            {"country": "Tajikistan", "capital": "Dushanbe"},
+            {"country": "Tanzania", "capital": "Dodoma"},
+            {"country": "Thailand", "capital": "Bangkok"},
+            {"country": "Timor-Leste", "capital": "Dili"},
+            {"country": "Togo", "capital": "Lomé"},
+            {"country": "Tonga", "capital": "Nuku'alofa"},
+            {"country": "Trinidad and Tobago", "capital": "Port of Spain"},
+            {"country": "Tunisia", "capital": "Tunis"},
+            {"country": "Turkey", "capital": "Ankara"},
+            {"country": "Turkmenistan", "capital": "Ashgabat"},
+            {"country": "Tuvalu", "capital": "Funafuti"},
+            {"country": "Uganda", "capital": "Kampala"},
+            {"country": "Ukraine", "capital": "Kyiv"},
+            {"country": "United Arab Emirates", "capital": "Abu Dhabi"},
+            {"country": "United Kingdom", "capital": "London"},
+            {"country": "United States", "capital": "Washington, D.C."},
+            {"country": "Uruguay", "capital": "Montevideo"},
+            {"country": "Uzbekistan", "capital": "Tashkent"},
+            {"country": "Vanuatu", "capital": "Port Vila"},
+            {"country": "Vatican City", "capital": "Vatican City"},
+            {"country": "Venezuela", "capital": "Caracas"},
+            {"country": "Vietnam", "capital": "Hanoi"},
+            {"country": "Yemen", "capital": "Sana'a"},
+            {"country": "Zambia", "capital": "Lusaka"},
+            {"country": "Zimbabwe", "capital": "Harare"}
+        ];
+
+        let currentFilter = '';
+
+        // Sort countries alphabetically
+        countriesData.sort((a, b) => a.country.localeCompare(b.country));
+
+        // Create alphabet buttons
+        function createAlphabetButtons() {
+            const buttonContainer = document.getElementById('alphabetButtons');
+            const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            
+            for (let letter of alphabet) {
+                const button = document.createElement('button');
+                button.className = 'alphabet-btn';
+                button.textContent = letter;
+                button.onclick = () => filterByAlphabet(letter);
+                buttonContainer.appendChild(button);
+            }
+        }
+
+        // Filter countries by alphabet
+        function filterByAlphabet(letter) {
+            console.log(`Filtering by letter: ${letter}`);
+            currentFilter = letter;
+            
+            // Update button states
+            document.querySelectorAll('.alphabet-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.textContent === letter) {
+                    btn.classList.add('active');
+                }
+            });
+
+            // Filter countries
+            const filteredCountries = countriesData.filter(country => 
+                country.country.toUpperCase().startsWith(letter)
+            );
+            
+            console.log(`Found ${filteredCountries.length} countries starting with ${letter}`);
+
+            // Update display
+            updateResultsHeader(letter, filteredCountries.length);
+            displayCountries(filteredCountries);
+        }
+
+        // Clear filter and show all countries
+        function clearFilter() {
+            currentFilter = '';
+            
+            // Remove active state from all buttons
+            document.querySelectorAll('.alphabet-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            showAllCountries();
+        }
+
+        // Show all countries
+        function showAllCountries() {
+            updateResultsHeader('All', countriesData.length);
+            displayCountries(countriesData);
+        }
+
+        // Update results header
+        function updateResultsHeader(filter, count) {
+            const header = document.getElementById('resultsHeader');
+            const statsContainer = document.getElementById('statsContainer');
+            
+            if (filter === 'All') {
+                header.textContent = 'All Countries and Capitals';
+                statsContainer.style.display = 'block';
+                statsContainer.textContent = `Total: ${count} countries`;
+            } else {
+                header.textContent = `Countries starting with "${filter}"`;
+                statsContainer.style.display = 'block';
+                statsContainer.textContent = `Found: ${count} countries`;
+            }
+        }
+
+        // Display countries
+        function displayCountries(countries) {
+            const countryList = document.getElementById('countryList');
+            
+            if (countries.length === 0) {
+                countryList.innerHTML = `
+                    <div class="no-results">
+                        No countries found starting with "${currentFilter}"
+                    </div>
+                `;
+                return;
+            }
+
+            countryList.innerHTML = countries.map(country => `
+                <div class="country-item">
+                    <div class="country-name">${country.country}</div>
+                    <div class="capital-name">Capital: ${country.capital}</div>
+                </div>
+            `).join('');
+        }
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Page loaded, creating alphabet buttons...');
+            createAlphabetButtons();
+            console.log('Countries data ready:', countriesData.length, 'countries');
+        });
+
+        // Add keyboard navigation
+        document.addEventListener('keydown', function(event) {
+            const key = event.key.toUpperCase();
+            if (key >= 'A' && key <= 'Z') {
+                filterByAlphabet(key);
+            } else if (event.key === 'Escape') {
+                clearFilter();
+            }
+        });
+    </script>
+</body>
+</html>

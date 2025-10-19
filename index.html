@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Countries and Capitals Explorer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .alphabet-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .alphabet-btn {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            border: none;
+            padding: 12px 16px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 50px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .alphabet-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(45deg, #45a049, #4CAF50);
+        }
+
+        .alphabet-btn.active {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a52);
+            transform: translateY(-2px);
+        }
+
+        .clear-btn {
+            background: linear-gradient(45deg, #ffa726, #ff9800);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-left: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .clear-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(45deg, #ff9800, #ffa726);
+        }
+
+        .results-container {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.1);
+            min-height: 200px;
+        }
+
+        .results-header {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .country-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+        }
+
+        .country-item {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .country-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .country-name {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .capital-name {
+            color: #666;
+            font-style: italic;
+        }
+
+        .no-results {
+            text-align: center;
+            color: #666;
+            font-size: 1.2em;
+            margin-top: 50px;
+        }
+
+        .loading {
+            text-align: center;
+            color: #667eea;
+            font-size: 1.1em;
+            margin-top: 20px;
+        }
+
+        .stats {
+            background: rgba(102, 126, 234, 0.1);
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+            color: #333;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+
+            .alphabet-container {
+                gap: 5px;
+            }
+
+            .alphabet-btn {
+                padding: 10px 12px;
+                font-size: 14px;
+                min-width: 40px;
+            }
+
+            .country-list {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌍 Countries and Capitals Explorer</h1>
+        
+        <div class="alphabet-container">
+            <div id="alphabetButtons">
+                <!-- Fallback alphabet buttons - will be replaced by JavaScript -->
+                <button class="alphabet-btn" onclick="filterByAlphabet('A')">A</button>
+                <button class="alphabet-btn" onclick="filterByAlphabet('B')">B</button>
+                <button class="alphabet-btn" onclick="filterByAlphabet('C')">C</button>
+                <button class="alphabet-btn" onclick="filterByAlphabet('D')">D</button>
+                <button class="alphabet-btn" onclick="filterByAlphabet('E')">E</button>
+                <button class="alphabet-btn" onclick="filterByAlphabet('F')">F</button>
+                <button class="alphabet-btn" onclick="filterByAlphabet('G')">G</button>
+                <button class="alphabet-btn" onclick="filterByAlphabet('H')">H</button>
+                <button class="alphabet-btn" onclick="filterByAlphabet('I')">I</button>
+                <button class="alphabet-btn" onclick="filterByAlphabet('J')">J</button>
+                <button class="alphabet-btn" onclick="filterByAlphabet('K')">K</button>
+                <button class="alphabet-btn" onclick="filterByAlphabet('L')">L</button>
+                <button class="alphabet-btn" onclick="filterByAlphabet('M')">M</button>
+                <button class="alphabet-btn" onclick="filterByAlphabet('N')">N</button>
+                <button class="alphabet-btn" onclick="filterByAlphabet('O')">O</button>
+                <button class="alphabet-btn" onclick="filterByAlphabet('P')">P</button>
+                <button class="alphabet-btn" onclick="filterByAlphabet('Q')">Q</button>
+                <button class="alphabet-btn" onclick="filterByAlphabet('R')">R</button>
+                <button class="alphabet-btn" onclick="filterByAlphabet('S')">S</button>
+                <button class="alphabet-btn" onclick="filterByAlphabet('T')">T</button>
+                <button class="alphabet-btn" onclick="filterByAlphabet('U')">U</button>
+                <button class="alphabet-btn" onclick="filterByAlphabet('V')">V</button>
+                <button class="alphabet-btn" onclick="filterByAlphabet('W')">W</button>
+                <button class="alphabet-btn" onclick="filterByAlphabet('X')">X</button>
+                <button class="alphabet-btn" onclick="filterByAlphabet('Y')">Y</button>
+                <button class="alphabet-btn" onclick="filterByAlphabet('Z')">Z</button>
+            </div>
+            <button class="clear-btn" onclick="clearFilter()">Show All</button>
+        </div>
+
+        <div class="results-container">
+            <div class="results-header" id="resultsHeader">
+                Select an alphabet to explore countries
+            </div>
+            <div class="stats" id="statsContainer" style="display: none;"></div>
+            <div class="country-list" id="countryList">
+                <div class="loading">Loading countries data...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let countriesData = [];
+        let currentFilter = '';
+
+        // Load countries data
+        async function loadCountriesData() {
+            try {
+                console.log('Attempting to load countries.json...');
+                const response = await fetch('countries.json');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                countriesData = await response.json();
+                console.log('Successfully loaded countries:', countriesData.length);
+                
+                // Sort countries alphabetically
+                countriesData.sort((a, b) => a.country.localeCompare(b.country));
+                
+                // Show all countries once data is loaded
+                showAllCountries();
+                
+                // Update the header to show success
+                document.getElementById('resultsHeader').textContent = 
+                    `✅ Loaded ${countriesData.length} countries successfully! Click any letter to filter.`;
+            } catch (error) {
+                console.error('Error loading countries data:', error);
+                document.getElementById('countryList').innerHTML = 
+                    `<div class="no-results">
+                        <h3>⚠️ Unable to load countries data</h3>
+                        <p><strong>Error:</strong> ${error.message}</p>
+                        <p><strong>Solution:</strong> Please use a local server to run this application.</p>
+                        <p>Try opening: <a href="http://localhost:8000" target="_blank">http://localhost:8000</a></p>
+                    </div>`;
+            }
+        }
+
+        // Create alphabet buttons
+        function createAlphabetButtons() {
+            const buttonContainer = document.getElementById('alphabetButtons');
+            // Clear existing buttons first
+            buttonContainer.innerHTML = '';
+            
+            const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            
+            for (let letter of alphabet) {
+                const button = document.createElement('button');
+                button.className = 'alphabet-btn';
+                button.textContent = letter;
+                button.onclick = () => filterByAlphabet(letter);
+                buttonContainer.appendChild(button);
+            }
+        }
+
+        // Filter countries by alphabet
+        function filterByAlphabet(letter) {
+            console.log(`Filtering by letter: ${letter}`);
+            console.log(`Countries data loaded: ${countriesData.length} countries`);
+            
+            currentFilter = letter;
+            
+            // Update button states
+            document.querySelectorAll('.alphabet-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.textContent === letter) {
+                    btn.classList.add('active');
+                }
+            });
+
+            // Check if countries data is loaded
+            if (countriesData.length === 0) {
+                console.log('No countries data available yet');
+                updateResultsHeader(letter, 0);
+                document.getElementById('countryList').innerHTML = 
+                    '<div class="loading">⏳ Countries data not loaded yet. Please wait or refresh the page.</div>';
+                return;
+            }
+
+            // Filter countries
+            const filteredCountries = countriesData.filter(country => 
+                country.country.toUpperCase().startsWith(letter)
+            );
+            
+            console.log(`Found ${filteredCountries.length} countries starting with ${letter}`);
+            if (filteredCountries.length > 0) {
+                console.log('Sample countries:', filteredCountries.slice(0, 3).map(c => c.country));
+            }
+
+            // Update display
+            updateResultsHeader(letter, filteredCountries.length);
+            displayCountries(filteredCountries);
+        }
+
+        // Clear filter and show all countries
+        function clearFilter() {
+            currentFilter = '';
+            
+            // Remove active state from all buttons
+            document.querySelectorAll('.alphabet-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            showAllCountries();
+        }
+
+        // Show all countries
+        function showAllCountries() {
+            if (countriesData.length === 0) {
+                updateResultsHeader('All', 0);
+                document.getElementById('countryList').innerHTML = 
+                    '<div class="loading">Loading countries data, please wait...</div>';
+                return;
+            }
+            updateResultsHeader('All', countriesData.length);
+            displayCountries(countriesData);
+        }
+
+        // Update results header
+        function updateResultsHeader(filter, count) {
+            const header = document.getElementById('resultsHeader');
+            const statsContainer = document.getElementById('statsContainer');
+            
+            if (filter === 'All') {
+                header.textContent = 'All Countries and Capitals';
+                statsContainer.style.display = 'block';
+                statsContainer.textContent = `Total: ${count} countries`;
+            } else {
+                header.textContent = `Countries starting with "${filter}"`;
+                statsContainer.style.display = 'block';
+                statsContainer.textContent = `Found: ${count} countries`;
+            }
+        }
+
+        // Display countries
+        function displayCountries(countries) {
+            const countryList = document.getElementById('countryList');
+            
+            if (countries.length === 0) {
+                countryList.innerHTML = `
+                    <div class="no-results">
+                        No countries found starting with "${currentFilter}"
+                    </div>
+                `;
+                return;
+            }
+
+            countryList.innerHTML = countries.map(country => `
+                <div class="country-item">
+                    <div class="country-name">${country.country}</div>
+                    <div class="capital-name">Capital: ${country.capital}</div>
+                </div>
+            `).join('');
+        }
+
+        // Get countries count by letter (for statistics)
+        function getCountsByLetter() {
+            const counts = {};
+            const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            
+            // Initialize counts
+            for (let letter of alphabet) {
+                counts[letter] = 0;
+            }
+            
+            // Count countries by first letter
+            countriesData.forEach(country => {
+                const firstLetter = country.country.charAt(0).toUpperCase();
+                if (counts.hasOwnProperty(firstLetter)) {
+                    counts[firstLetter]++;
+                }
+            });
+            
+            return counts;
+        }
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            // Always create alphabet buttons first
+            createAlphabetButtons();
+            // Then try to load countries data
+            loadCountriesData();
+        });
+
+        // Add keyboard navigation
+        document.addEventListener('keydown', function(event) {
+            const key = event.key.toUpperCase();
+            if (key >= 'A' && key <= 'Z') {
+                filterByAlphabet(key);
+            } else if (event.key === 'Escape') {
+                clearFilter();
+            }
+        });
+    </script>
+</body>
+</html>
